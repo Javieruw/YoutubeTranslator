@@ -3,8 +3,10 @@ import whisper
 from pytube import YouTube
 import moviepy.editor as mp
 import os
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/process_string', methods=['POST'])
 def process_string():
