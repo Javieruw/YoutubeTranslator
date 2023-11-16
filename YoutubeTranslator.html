@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>YouTube Transcription</title>
+    <style>
+        /* Add your CSS styling here */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        #transcription {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            width: 60%;
+        }
+    </style>
+</head>
+<body>
+    <input type="text" id="youtubeLink" placeholder="Enter YouTube Link">
+    <button onclick="sendLink()">Transcribe</button>
+    <div id="transcription"></div>
+
+    <script>
+        // Add your JavaScript here
+        function sendLink() {
+            var youtubeLink = document.getElementById('youtubeLink').value;
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "http://154.62.108.77:5000/process_string", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    document.getElementById('transcription').innerText = response.output;
+                }
+            };
+            var data = JSON.stringify({"input": youtubeLink});
+            xhr.send(data);
+        }
+    </script>
+</body>
+</html>
