@@ -48,10 +48,11 @@ CORS(app)
 
 @app.route('/process_string', methods=['POST'])
 def process_string():
-    referrer = request.headers.get("Referer")
-    print(f"Received Referer: {referrer}")  # Debugging print statement
+    # Check if the request is from the specific IP
+    allowed_ip = '154.62.108.77'
+    client_ip = request.remote_addr
 
-    if referrer is None or "javierperalta.dk" not in referrer:
+    if client_ip != allowed_ip:
         return jsonify({"error": "Unauthorized access"}), 403
 
     try:
