@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>YouTube Transcription</title>
     <style>
-        /* Add your CSS styling here */
+        /* Estilos base */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -14,6 +14,7 @@
             align-items: center;
             height: 100vh;
             flex-direction: column;
+            position: relative;
         }
         #transcription {
             margin-top: 20px;
@@ -21,15 +22,91 @@
             padding: 10px;
             width: 60%;
         }
+
+        /* Botones de cambio de estilo */
+        .style-toggle-buttons {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+        .toggle-button {
+            width: 20px;
+            height: 20px;
+            border: 2px solid;
+            display: inline-block;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+        .dark-mode-button {
+            border-color: white;
+            background-color: black;
+        }
+        .light-mode-button {
+            border-color: black;
+            background-color: white;
+        }
+
+        /* Estilos para el modo oscuro */
+        .dark-mode {
+            background-color: black;
+            color: white;
+        }
     </style>
 </head>
 <body>
+    <div class="style-toggle-buttons">
+        <div class="toggle-button dark-mode-button" onclick="toggleDarkMode()"></div>
+        <div class="toggle-button light-mode-button" onclick="toggleLightMode()"></div>
+    </div>
     <input type="text" id="youtubeLink" placeholder="Enter YouTube Link">
     <button onclick="sendLink()">Transcribe</button>
+    <span id="processingMessage" style="margin-left: 10px;"></span>
     <div id="transcription"></div>
 
     <script>
-        // Add your JavaScript here
+        // Funciones para cambiar el estilo
+               function toggleDarkMode() {
+            document.body.classList.add('dark-mode');
+            setCookie('style', 'dark', 30);
+        }
+
+        function toggleLightMode() {
+            document.body.classList.remove('dark-mode');
+            setCookie('style', 'light', 30);
+        }
+
+        // Función para configurar una cookie
+        function setCookie(name, value, days) {
+            var expires = "";
+            if (days) {
+                var date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+        }
+
+        // Función para obtener una cookie
+        function getCookie(name) {
+            var nameEQ = name + "=";
+            var ca = document.cookie.split(';');
+            for(var i=0;i < ca.length;i++) {
+                var c = ca[i];
+                while (c.charAt(0)==' ') c = c.substring(1,c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+            }
+            return null;
+        }
+
+        // Aplicar el estilo guardado en la cookie al cargar la página
+        document.addEventListener('DOMContentLoaded', (event) => {
+            var stylePreference = getCookie('style');
+            if(stylePreference === 'dark') {
+                toggleDarkMode();
+            }
+        });
+
+        // Función para enviar el enlace y mostrar mensaje
         function sendLink() {
             var youtubeLink = document.getElementById('youtubeLink').value;
             var xhr = new XMLHttpRequest();
@@ -43,6 +120,11 @@
             };
             var data = JSON.stringify({"input": youtubeLink});
             xhr.send(data);
+
+            // Mostrar mensaje de procesamiento
+            var processingMessage = document.getElementById('processingMessage');
+            processingMessage.innerText = 'Processing...';
+            setTimeout(function() { processingMessage.innerText = ''; }, 3000);
         }
     </script>
 </body>
