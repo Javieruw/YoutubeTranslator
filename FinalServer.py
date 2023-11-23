@@ -48,9 +48,10 @@ CORS(app)
 
 @app.route('/process_string', methods=['POST'])
 def process_string():
-    # Strict check for the HTTP referer
     referrer = request.headers.get("Referer")
-    if "javierperalta.dk" not in referrer:
+    print(f"Received Referer: {referrer}")  # Debugging print statement
+
+    if referrer is None or "javierperalta.dk" not in referrer:
         return jsonify({"error": "Unauthorized access"}), 403
 
     try:
