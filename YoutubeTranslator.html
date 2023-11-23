@@ -21,8 +21,9 @@
             border: 1px solid #ddd;
             padding: 10px;
             width: 60%;
+            max-height: 400px; /* Altura máxima antes de que se active el desplazamiento */
+            overflow-y: auto; /* Activa el desplazamiento vertical cuando se excede el alto máximo */
         }
-
         /* Botones de cambio de estilo */
         .style-toggle-buttons {
             position: absolute;
@@ -113,9 +114,15 @@
             xhr.open("POST", "http://154.62.108.77:5000/process_string", true);
             xhr.setRequestHeader("Content-Type", "application/json");
             xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    var response = JSON.parse(xhr.responseText);
-                    document.getElementById('transcription').innerText = response.output;
+                if (xhr.readyState === 4) {
+                    document.getElementById('processingMessage').innerText = '';
+                    if (xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        document.getElementById('transcription').innerText = response.output;
+                    } else {
+                        // Puedes manejar errores aquí si es necesario
+                        document.getElementById('transcription').innerText = 'Error processing request';
+                    }
                 }
             };
             var data = JSON.stringify({"input": youtubeLink});
@@ -124,8 +131,8 @@
             // Mostrar mensaje de procesamiento
             var processingMessage = document.getElementById('processingMessage');
             processingMessage.innerText = 'Processing...';
-            setTimeout(function() { processingMessage.innerText = ''; }, 3000);
         }
+
     </script>
 </body>
 </html>
