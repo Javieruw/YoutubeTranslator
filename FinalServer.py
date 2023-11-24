@@ -46,6 +46,12 @@ CORS(app)
 # if __name__ == '__main__':
 #     app.run(debug=True)
 
+@app.route('/')
+def index():
+    token = secrets.token_hex(16)  # Generate a secure token
+    return render_template('YoutubeTranslator.html', token=token)
+
+
 @app.route('/process_string', methods=['POST'])
 # def process_string():
 #     client_ip = request.remote_addr
@@ -88,4 +94,4 @@ CORS(app)
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=False, threaded=True)
+    app.run(host='0.0.0.0', port=5000, debug=False, threaded=True)
