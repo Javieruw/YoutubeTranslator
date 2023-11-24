@@ -47,13 +47,13 @@ CORS(app)
 #     app.run(debug=True)
 
 @app.route('/process_string', methods=['POST'])
-def process_string():
-    client_ip = request.remote_addr
-    print(f"Client IP: {client_ip}")  # Debugging print statement
+# def process_string():
+#     client_ip = request.remote_addr
+#     print(f"Client IP: {client_ip}")  # Debugging print statement
 
-    allowed_ip = '154.62.108.77'
-    if client_ip != allowed_ip:
-        return jsonify({"error": "Unauthorized access from IP: " + client_ip}), 403
+#     allowed_ip = '154.62.108.77'
+#     if client_ip != allowed_ip:
+#         return jsonify({"error": "Unauthorized access from IP: " + client_ip}), 403
 
 
     try:
