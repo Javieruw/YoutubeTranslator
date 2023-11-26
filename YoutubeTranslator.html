@@ -1,10 +1,12 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Transcription</title>
     <style>
-        /* Estilos base */
+        /* Base styles */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -14,17 +16,31 @@
             align-items: center;
             height: 100vh;
             flex-direction: column;
-            position: relative;
+            background-color: white;
         }
         #transcription {
             margin-top: 20px;
             border: 1px solid #ddd;
             padding: 10px;
             width: 60%;
-            max-height: 400px; /* Altura máxima antes de que se active el desplazamiento */
-            overflow-y: auto; /* Activa el desplazamiento vertical cuando se excede el alto máximo */
+            max-height: 80%;
+            overflow-y: auto;
         }
-        /* Botones de cambio de estilo */
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        button {
+            cursor: pointer;
+            background-color: #f0f0f0;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #e0e0e0;
+        }
+        /* Style toggle buttons */
         .style-toggle-buttons {
             position: absolute;
             top: 10px;
@@ -46,11 +62,32 @@
             border-color: black;
             background-color: white;
         }
-
-        /* Estilos para el modo oscuro */
+        /* Dark mode styles */
         .dark-mode {
             background-color: black;
             color: white;
+        }
+        /* Mobile specific styles */
+        @media screen and (max-width: 600px) {
+            #transcription, input, button {
+                width: 90%;
+            }
+            .toggle-button {
+                width: 30px;
+                height: 30px;
+            }
+            #pasteButton {
+                display: inline; /* Show paste button on mobile */
+            }
+        }
+        /* Desktop specific styles */
+        @media screen and (min-width: 601px) {
+            input {
+                width: 50%; /* Larger input field on desktop */
+            }
+            #pasteButton {
+                display: none; /* Hide paste button on desktop */
+            }
         }
     </style>
 </head>
@@ -60,10 +97,10 @@
         <div class="toggle-button light-mode-button" onclick="toggleLightMode()"></div>
     </div>
     <input type="text" id="youtubeLink" placeholder="Enter YouTube Link">
+    <button id="pasteButton" onclick="pasteLink()" style="display: none;">Paste</button>
     <button onclick="sendLink()">Transcribe</button>
     <span id="processingMessage" style="margin-left: 10px;"></span>
     <div id="transcription"></div>
-
     <script>
         // Funciones para cambiar el estilo
                function toggleDarkMode() {
@@ -106,24 +143,44 @@
                 toggleDarkMode();
             }
         });
+	
+	function pollForResult(taskId) {
+   	 var xhr = new XMLHttpRequest();
+    	xhr.open("GET", "https://javierperalta.dk/get_task_result/" + taskId, true);
+    	xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText);
+            if (response.state === 'SUCCESS') {
+                document.getElementById('transcription').innerText = response.result;
+            } else if (response.state !== 'FAILURE') {
+                // Task still running, poll again after a delay
+                setTimeout(function() {
+                    pollForResult(taskId);
+                }, 2000); // Adjust polling interval as needed
+            } else {
+                // Handle failure
+                document.getElementById('transcription').innerText = 'Error: ' + response.status;
+        	    }
+       	 }
+   	 };
+    	xhr.send();
+	}
 
         // Función para enviar el enlace y mostrar mensaje
         function sendLink() {
             var youtubeLink = document.getElementById('youtubeLink').value;
             var xhr = new XMLHttpRequest();
-            xhr.open("POST", "http://154.62.108.77:5000/process_string", true);
+            xhr.open("POST", "https://javierperalta.dk/process_string", true);
             xhr.setRequestHeader("Content-Type", "application/json");
             xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4) {
-                    document.getElementById('processingMessage').innerText = '';
-                    if (xhr.status === 200) {
-                        var response = JSON.parse(xhr.responseText);
-                        document.getElementById('transcription').innerText = response.output;
-                    } else {
-                        // Puedes manejar errores aquí si es necesario
-                        document.getElementById('transcription').innerText = 'Error processing request';
-                    }
-                }
+            if (xhr.readyState === 4 && xhr.status === 202) {
+              var response = JSON.parse(xhr.responseText);
+              pollForResult(response.task_id); // Start polling for result
+            }
+             else if (xhr.readyState === 4) {
+            // Handle other HTTP status codes
+            document.getElementById('transcription').innerText = 'Error: ' + xhr.status + ' - ' + xhr.statusText;
+              }
             };
             var data = JSON.stringify({"input": youtubeLink});
             xhr.send(data);
@@ -132,7 +189,15 @@
             var processingMessage = document.getElementById('processingMessage');
             processingMessage.innerText = 'Processing...';
         }
-
+	        function pasteLink() {
+            navigator.clipboard.readText()
+                .then(text => {
+                    document.getElementById('youtubeLink').value = text;
+                })
+                .catch(err => {
+                    console.error('Failed to read clipboard contents: ', err);
+                });
+        }
     </script>
 </body>
 </html>
