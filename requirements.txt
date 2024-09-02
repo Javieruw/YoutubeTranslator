@@ -1,0 +1,6 @@
+flask
+openai-whisper
+yt-dlp
+moviepy
+celery[redis]
+redis
