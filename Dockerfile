@@ -26,4 +26,4 @@ EXPOSE 5060
 ENV FLASK_APP=app.py
 
 # Run app.py when the container launches
-CMD ["flask", "run", "--host=0.0.0.0", "--port=5060"]
+CMD ["flask", "run", "--host=0.0.0.0", "--port=5060", "--app=FinalServer"]
